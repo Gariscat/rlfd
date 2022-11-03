@@ -13,6 +13,7 @@ class PulseEnv(gym.Env):
         high=5.,
         scale=1e8,
         num_gaps=16,
+        max_steps=1000,
         reward_func=None,
     ) -> None:
         super().__init__()
@@ -22,8 +23,9 @@ class PulseEnv(gym.Env):
         self._scale = scale
         self._num_gaps = num_gaps
         self._reward_func = reward_func
+        self._max_steps = max_steps
 
-        self.action_space = gym.spaces.Box(np.array([low]), np.array([high]), dtype=np.float64)
+        self.action_space = gym.spaces.Box(np.array([low]), np.array([high]), dtype=np.float32)
 
         lows, highs = [low], [high]
         for _ in range(self._obs_ord-1):
@@ -33,20 +35,22 @@ class PulseEnv(gym.Env):
         self.observation_space = gym.spaces.Box(
             np.vstack([np.array(lows)]*num_gaps),
             np.vstack([np.array(highs)]*num_gaps),
-            dtype=np.float64
+            dtype=np.float32
         )
 
         rece_times = []
         with open(self._trace_path, 'r') as f:
             log_items = f.readlines()
-        for line in tqdm(log_items, desc='initialize env - collecting log items'):
+        for i, line in enumerate(tqdm(log_items, desc='initialize env - collecting log items')):
+            # if i > 10000: break
             log_item = [int(x) for x in line.strip().split()]
             try:
                 source_id, _, _, rece_time, _ = log_item
                 if source_id != self._source_id:
                     continue
             except ValueError:
-                continue # erroneous log item (e.g. not enough items to unpack)
+                ### erroneous log item (e.g. not enough items to unpack)
+                continue
             rece_times.append(rece_time)
         
         if len(rece_times) == 0:
@@ -58,7 +62,8 @@ class PulseEnv(gym.Env):
 
     def reset(self):
         self.state = self._get_obs(np.zeros(self._num_gaps))
-        self._gap_idx = 0
+        self._gap_idx = np.random.choice(self._gaps.shape[0]-self._max_steps)
+        self._step_cnt = 0
         return self.state
 
     def step(self, action):
@@ -75,10 +80,15 @@ class PulseEnv(gym.Env):
             reward = np.exp(-np.abs(action-next_gap))
         else:
             reward = self._reward_func(action, next_gap)
+        reward = reward.item()
 
-        done = bool(self._gap_idx >= len(self._gaps))
+        self._step_cnt += 1
+        done = bool(self._gap_idx >= len(self._gaps) or self._step_cnt == self._max_steps)
 
         return self.state, reward, done, {}
+
+    def render(self, mode='human', close=False):
+        pass
 
     def _get_obs(self, gaps):
         ### e.g. when obs_ord = 3 
