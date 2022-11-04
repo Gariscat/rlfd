@@ -75,17 +75,20 @@ class PulseEnv(gym.Env):
         self.state = self._get_obs(cur_gaps)
         self._gap_idx += 1
 
+        dis = np.abs(action-next_gap).item()
         if self._reward_func is None:
             # default is e^(-dis)
-            reward = np.exp(-np.abs(action-next_gap))
+            reward = np.exp(-dis)
         else:
             reward = self._reward_func(action, next_gap)
-        reward = reward.item()
 
         self._step_cnt += 1
         done = bool(self._gap_idx >= len(self._gaps) or self._step_cnt == self._max_steps)
 
-        return self.state, reward, done, {}
+        info = {}
+        info['actual_dis'] = dis
+
+        return self.state, reward, done, info
 
     def render(self, mode='human', close=False):
         pass

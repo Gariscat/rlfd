@@ -12,7 +12,27 @@ no change     /gpfsnyu/packages/anaconda3/5.2.0/etc/profile.d/conda.csh
 no change     /gpfsnyu/home/xl3133/.bashrc
 No action taken.
 /gpfsnyu/home/xl3133/.conda/envs/mlfd/bin/python
+Fri Nov  4 17:11:13 2022       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 515.65.01    Driver Version: 515.65.01    CUDA Version: 11.7     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA GeForce ...  On   | 00000000:B1:00.0 Off |                  N/A |
+| 27%   28C    P8    12W / 250W |      0MiB / 11264MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
 Using cuda device
 Wrapping the env with a `Monitor` wrapper
 Wrapping the env in a DummyVecEnv.
-Logging to ./logs/DDPG_1
+Logging to ./logs/DDPG_4
