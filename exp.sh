@@ -8,8 +8,9 @@
 #SBATCH --mem=32GB
 ### SBATCH --mail-type=END
 ### SBATCH --mail-user=xl3133@nyu.edu
-#SBATCH --output=output.out
-#SBATCH --error=output.err
+#SBATCH --array=1-3
+#SBATCH --output=runs/output.out
+#SBATCH --error=runs/output.err
 
 conda init bash
 source ~/.bashrc 
@@ -21,4 +22,4 @@ which python
 nvidia-smi
 
 cd ~/rlfd/
-python grid_exp.py
+python grid_exp.py --task_id ${SLURM_ARRAY_TASK_ID}
