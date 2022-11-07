@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH -J rlfd
+#SBATCH -J rlfd_grid_exp
 #SBATCH --verbose
 #SBATCH -p aquila
 #SBATCH --nodes=1
-#SBATCH --time=12:00:00
+#SBATCH --time=72:00:00
 #SBATCH --gres=gpu:2080Ti:1
 #SBATCH --mem=32GB
 ### SBATCH --mail-type=END
@@ -21,4 +21,4 @@ which python
 nvidia-smi
 
 cd ~/rlfd/
-python demo.py
+python grid_exp.py

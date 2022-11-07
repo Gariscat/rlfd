@@ -12,8 +12,8 @@ class PulseEnv(gym.Env):
         low=0.,
         high=5.,
         scale=1e8,
-        num_gaps=16,
-        max_steps=1000,
+        seq_len=16,
+        epi_len=1000,
         reward_func=None,
     ) -> None:
         super().__init__()
@@ -21,9 +21,9 @@ class PulseEnv(gym.Env):
         self._source_id = source_id
         self._obs_ord = obs_ord
         self._scale = scale
-        self._num_gaps = num_gaps
+        self._seq_len = seq_len
         self._reward_func = reward_func
-        self._max_steps = max_steps
+        self._epi_len = epi_len
 
         self.action_space = gym.spaces.Box(np.array([low]), np.array([high]), dtype=np.float32)
 
@@ -33,8 +33,8 @@ class PulseEnv(gym.Env):
             highs += [highs[-1] - lows[-1]]
         
         self.observation_space = gym.spaces.Box(
-            np.vstack([np.array(lows)]*num_gaps),
-            np.vstack([np.array(highs)]*num_gaps),
+            np.vstack([np.array(lows)]*seq_len),
+            np.vstack([np.array(highs)]*seq_len),
             dtype=np.float32
         )
 
@@ -61,8 +61,8 @@ class PulseEnv(gym.Env):
         del rece_times
 
     def reset(self):
-        self.state = self._get_obs(np.zeros(self._num_gaps))
-        self._gap_idx = np.random.choice(self._gaps.shape[0]-self._max_steps)
+        self.state = self._get_obs(np.zeros(self._seq_len))
+        self._gap_idx = np.random.choice(self._gaps.shape[0]-self._epi_len)
         self._step_cnt = 0
         return self.state
 
@@ -83,7 +83,7 @@ class PulseEnv(gym.Env):
             reward = self._reward_func(action, next_gap)
 
         self._step_cnt += 1
-        done = bool(self._gap_idx >= len(self._gaps) or self._step_cnt == self._max_steps)
+        done = bool(self._gap_idx >= len(self._gaps) or self._step_cnt == self._epi_len)
 
         info = {}
         info['actual_dis'] = dis
@@ -103,7 +103,7 @@ class PulseEnv(gym.Env):
         obs[:, 0] = gaps
         for i in range(self._obs_ord-1):
             obs[i+1:, i+1] = obs[i+1:, i] - obs[:-i-1, i]
-        assert obs.shape == (self._num_gaps, self._obs_ord)
+        assert obs.shape == (self._seq_len, self._obs_ord)
         return obs
 
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     """
     trace_path = './traces/trace.log'
     node_id = 5
-    env = PulseEnv(trace_path, node_id, obs_ord=3, num_gaps=64)
+    env = PulseEnv(trace_path, node_id, obs_ord=3, seq_len=64)
     
     o = env.reset()
     d = None
