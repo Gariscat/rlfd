@@ -2,7 +2,7 @@
 #SBATCH -J rlfd_grid_exp
 #SBATCH --verbose
 #SBATCH -p aquila
-#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --time=72:00:00
 #SBATCH --gres=gpu:2080Ti:1
 #SBATCH --mem=32GB
@@ -22,4 +22,4 @@ which python
 nvidia-smi
 
 cd ~/rlfd/
-python grid_exp.py --tot_steps 200000 --task_id ${SLURM_ARRAY_TASK_ID}
+python grid_exp.py --tot_steps 500000 --task_id ${SLURM_ARRAY_TASK_ID}

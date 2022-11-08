@@ -29,14 +29,14 @@ def main(_):
     os.makedirs(FLAGS.run_dir, exist_ok=True)
     os.makedirs(FLAGS.ckpt_dir, exist_ok=True)
     
-    wandb.init(project="rlfd", entity='gariscat')
-    wandb.config = {
+    hyper = {
         "obs_ord": FLAGS.obs_ord,
         "seq_len": FLAGS.seq_len,
         "features_dim": FLAGS.features_dim,
         "num_layers": FLAGS.num_layers,
         "tot_steps": FLAGS.tot_steps
     }
+    wandb.init(project="rlfd", entity='gariscat', config=hyper)
     
     env = PulseEnv(
         trace_path=FLAGS.trace_path,
