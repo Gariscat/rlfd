@@ -13,14 +13,14 @@ class RNNEncoder(stable_baselines3.common.torch_layers.BaseFeaturesExtractor):
     def __init__(self,
         observation_space: gym.spaces.Box,
         features_dim: int = 32,
-        hidden_size: int = 32,
+        # hidden_size: int = 32,
         # seq_len: int = 256,
         num_layers: int = 3,
         rnn: nn.Module = nn.LSTM
     ):
         super().__init__(observation_space, features_dim)
-        assert features_dim == hidden_size
-
+        # assert features_dim == hidden_size
+        hidden_size = features_dim
         self.net = rnn(
             input_size=observation_space.shape[-1],
             hidden_size=hidden_size,

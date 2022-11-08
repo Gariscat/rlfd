@@ -2,6 +2,7 @@ import gym
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import wandb
 
 
 class PulseEnv(gym.Env):
@@ -15,6 +16,7 @@ class PulseEnv(gym.Env):
         seq_len=16,
         epi_len=1000,
         reward_func=None,
+        logger=wandb
     ) -> None:
         super().__init__()
         self._trace_path = trace_path
@@ -24,6 +26,7 @@ class PulseEnv(gym.Env):
         self._seq_len = seq_len
         self._reward_func = reward_func
         self._epi_len = epi_len
+        self._logger = logger
 
         self.action_space = gym.spaces.Box(np.array([low]), np.array([high]), dtype=np.float32)
 
@@ -85,8 +88,13 @@ class PulseEnv(gym.Env):
         self._step_cnt += 1
         done = bool(self._gap_idx >= len(self._gaps) or self._step_cnt == self._epi_len)
 
-        info = {}
-        info['actual_dis'] = dis
+        info = {
+            'step_reward': reward,
+            'dis': dis,
+            'rescaled_dis': dis * self._scale
+        }
+        if self._logger:
+            self._logger.log(info)
 
         return self.state, reward, done, info
 
@@ -106,9 +114,9 @@ class PulseEnv(gym.Env):
         assert obs.shape == (self._seq_len, self._obs_ord)
         return obs
 
-
+"""
 if __name__ == '__main__':
-    """
+    
     trace_path = './traces/trace.log'
     node_id = 5
     env = PulseEnv(trace_path, node_id, obs_ord=3, seq_len=64)
@@ -121,4 +129,4 @@ if __name__ == '__main__':
         a = env.action_space.sample()
         o, r, d, _ = env.step(a)
         print(env._gap_idx)
-    """
+"""

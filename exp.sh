@@ -9,8 +9,8 @@
 ### SBATCH --mail-type=END
 ### SBATCH --mail-user=xl3133@nyu.edu
 #SBATCH --array=1-3
-#SBATCH --output=runs/output.out
-#SBATCH --error=runs/output.err
+#SBATCH --output=runs/output_%a.out
+#SBATCH --error=runs/output_%a.err
 
 conda init bash
 source ~/.bashrc 
@@ -22,4 +22,4 @@ which python
 nvidia-smi
 
 cd ~/rlfd/
-python grid_exp.py --task_id ${SLURM_ARRAY_TASK_ID}
+python grid_exp.py --tot_steps 200000 --task_id ${SLURM_ARRAY_TASK_ID}

@@ -7,6 +7,7 @@ from envs import PulseEnv
 from networks import RNNEncoder
 import stable_baselines3
 from stable_baselines3 import DDPG
+import wandb
 
 
 FLAGS = flags.FLAGS
@@ -28,12 +29,22 @@ def main(_):
     os.makedirs(FLAGS.run_dir, exist_ok=True)
     os.makedirs(FLAGS.ckpt_dir, exist_ok=True)
     
+    wandb.init(project="rlfd", entity='gariscat')
+    wandb.config = {
+        "obs_ord": FLAGS.obs_ord,
+        "seq_len": FLAGS.seq_len,
+        "features_dim": FLAGS.features_dim,
+        "num_layers": FLAGS.num_layers,
+        "tot_steps": FLAGS.tot_steps
+    }
+    
     env = PulseEnv(
         trace_path=FLAGS.trace_path,
         source_id=FLAGS.source_id,
         obs_ord=FLAGS.obs_ord,
         epi_len=FLAGS.epi_len,
         seq_len=FLAGS.seq_len,
+        logger=wandb,
     )
     env.seed(FLAGS.seed)
     # stable_baselines3.common.env_checker.check_env(env)
@@ -61,7 +72,7 @@ def main(_):
     )
     ckpt_name = re.sub(r'\W+', '', str(datetime.now()))
     model.save(os.path.join(FLAGS.ckpt_dir, config_info+'_'+ckpt_name))
-    
+    """"""
     """
     for _ in range(10):
         obs = env.reset()
