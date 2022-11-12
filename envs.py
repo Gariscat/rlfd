@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import wandb
-from losses import *
+from utils import *
 
 class PulseEnv(gym.Env):
     def __init__(self,
