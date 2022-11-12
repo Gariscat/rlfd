@@ -36,7 +36,7 @@ def main(_):
         "num_layers": FLAGS.num_layers,
         "tot_steps": FLAGS.tot_steps
     }
-    wandb.init(project="rlfd", entity='gariscat', config=hyper)
+    wandb.init(project="rlfd-debug", entity='gariscat', config=hyper)
     
     env = PulseEnv(
         trace_path=FLAGS.trace_path,

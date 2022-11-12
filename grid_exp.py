@@ -10,8 +10,8 @@ assert args.task_id > 0
 # task_id == obs_ord
     
 if __name__ == '__main__':
-    for seq_len in (64, 128, 256):
-        for features_dim in (16, 32):
+    for seq_len in (128, 256,):
+        for features_dim in (16,):
             # for wptype in [0.25, 0.5, 0.75]:
             for num_layers in (1, 2, 3):
                 subprocess.call(f'python train.py \
