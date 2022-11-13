@@ -85,8 +85,10 @@ class PulseEnv(gym.Env):
 
         info = {
             'step_reward': reward,
-            'dis': dis,
-            'rescaled_dis': dis * self._scale
+            'target': next_gap,
+            'pred': action,
+            # 'dis': dis,
+            # 'rescaled_dis': dis * self._scale
         }
         if self._logger:
             self._logger.log(info)

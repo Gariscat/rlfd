@@ -2,12 +2,12 @@ from absl import flags, app
 import os
 from datetime import datetime
 import re
-
+import wandb
 from envs import PulseEnv
 from networks import RNNEncoder
 import stable_baselines3
 from stable_baselines3 import DDPG
-import wandb
+from utils import evaluate
 
 
 FLAGS = flags.FLAGS
@@ -21,8 +21,9 @@ flags.DEFINE_integer('num_layers', 3, 'Number of layers of the RNN.')
 flags.DEFINE_integer('buffer_size', 100_000, 'Size of the replay buffer.')
 flags.DEFINE_string('run_dir', './runs/', 'Logger directory.')
 flags.DEFINE_string('ckpt_dir', './checkpoints/', 'Checkpoint directory.')
-flags.DEFINE_integer('tot_steps', 5_000_000, 'Total number of training steps.')
+flags.DEFINE_integer('tot_steps', 20_000, 'Total number of training steps.')
 flags.DEFINE_integer('seed', 0, 'Random seed.')
+flags.DEFINE_bool('debug', False, 'Debug mode does not store training logs.')
 
 
 def main(_):
@@ -36,7 +37,11 @@ def main(_):
         "num_layers": FLAGS.num_layers,
         "tot_steps": FLAGS.tot_steps
     }
-    wandb.init(project="rlfd-debug", entity='gariscat', config=hyper)
+
+    logger = None
+    if not FLAGS.debug:
+        logger = wandb
+        wandb.init(project="rlfd-grid", entity='gariscat', config=hyper, settings=wandb.Settings(start_method="fork"))
     
     env = PulseEnv(
         trace_path=FLAGS.trace_path,
@@ -44,7 +49,7 @@ def main(_):
         obs_ord=FLAGS.obs_ord,
         epi_len=FLAGS.epi_len,
         seq_len=FLAGS.seq_len,
-        logger=wandb,
+        logger=logger,
     )
     env.seed(FLAGS.seed)
     # stable_baselines3.common.env_checker.check_env(env)
@@ -67,11 +72,14 @@ def main(_):
     model.learn(
         total_timesteps=FLAGS.tot_steps,
         log_interval=1,
-        tb_log_name=config_info,
+        tb_log_name=config_info if not FLAGS.debug else 'debug',
         progress_bar=True
     )
     ckpt_name = re.sub(r'\W+', '', str(datetime.now()))
     model.save(os.path.join(FLAGS.ckpt_dir, config_info+'_'+ckpt_name))
+
+    eval_results = evaluate(env, model, num_episodes=10)
+    print(eval_results)
     """"""
     """
     for _ in range(10):
