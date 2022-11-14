@@ -23,8 +23,8 @@ flags.DEFINE_string('run_dir', './runs/', 'Logger directory.')
 flags.DEFINE_string('ckpt_dir', './checkpoints/', 'Checkpoint directory.')
 flags.DEFINE_integer('tot_steps', 20_000, 'Total number of training steps.')
 flags.DEFINE_integer('seed', 0, 'Random seed.')
-flags.DEFINE_bool('debug', False, 'Debug mode does not store training logs.')
-
+# flags.DEFINE_bool('debug', False, 'Debug mode does not store training logs.')
+flags.DEFINE_bool('wandb', False, 'Whether use W&B for logging.')
 
 def main(_):
     os.makedirs(FLAGS.run_dir, exist_ok=True)
@@ -39,7 +39,7 @@ def main(_):
     }
 
     logger = None
-    if not FLAGS.debug:
+    if FLAGS.wandb:
         logger = wandb
         wandb.init(project="rlfd-grid", entity='gariscat', config=hyper, settings=wandb.Settings(start_method="fork"))
     
@@ -72,7 +72,7 @@ def main(_):
     model.learn(
         total_timesteps=FLAGS.tot_steps,
         log_interval=1,
-        tb_log_name=config_info if not FLAGS.debug else 'debug',
+        tb_log_name=config_info,
         progress_bar=True
     )
     ckpt_name = re.sub(r'\W+', '', str(datetime.now()))
