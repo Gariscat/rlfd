@@ -22,4 +22,4 @@ which python
 nvidia-smi
 
 cd ~/rlfd/
-python grid_exp.py --tot_steps 200_000 --task_id ${SLURM_ARRAY_TASK_ID} 
+python grid_exp.py --tot_steps 20_000 --task_id ${SLURM_ARRAY_TASK_ID}

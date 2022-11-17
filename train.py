@@ -21,10 +21,10 @@ flags.DEFINE_integer('num_layers', 3, 'Number of layers of the RNN.')
 flags.DEFINE_integer('buffer_size', 100_000, 'Size of the replay buffer.')
 flags.DEFINE_string('run_dir', './runs/', 'Logger directory.')
 flags.DEFINE_string('ckpt_dir', './checkpoints/', 'Checkpoint directory.')
-flags.DEFINE_integer('tot_steps', 20_000, 'Total number of training steps.')
+flags.DEFINE_integer('tot_steps', 200_000, 'Total number of training steps.')
 flags.DEFINE_integer('seed', 0, 'Random seed.')
 # flags.DEFINE_bool('debug', False, 'Debug mode does not store training logs.')
-flags.DEFINE_bool('wandb', False, 'Whether use W&B for logging.')
+flags.DEFINE_bool('wandb', True, 'Whether use W&B for logging.')
 
 def main(_):
     os.makedirs(FLAGS.run_dir, exist_ok=True)
@@ -38,10 +38,8 @@ def main(_):
         "tot_steps": FLAGS.tot_steps
     }
 
-    logger = None
-    if FLAGS.wandb:
-        logger = wandb
-        wandb.init(project="rlfd-grid", entity='gariscat', config=hyper, settings=wandb.Settings(start_method="fork"))
+    wandb.init(project="rlfd-grid", config=hyper)
+    logger = wandb if FLAGS.wandb else None
     
     env = PulseEnv(
         trace_path=FLAGS.trace_path,
