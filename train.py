@@ -2,12 +2,12 @@ from absl import flags, app
 import os
 from datetime import datetime
 import re
-import wandb
 from envs import PulseEnv
 from networks import RNNEncoder
 import stable_baselines3
 from stable_baselines3 import DDPG
-from utils import evaluate
+from utils import *
+import json
 
 
 FLAGS = flags.FLAGS
@@ -17,6 +17,7 @@ flags.DEFINE_integer('obs_ord', 3, 'The highest order of observations.')
 flags.DEFINE_integer('epi_len', 10000, 'Length of an episode.')
 flags.DEFINE_integer('seq_len', 128, 'Length of the input of RNN.')
 flags.DEFINE_integer('features_dim', 32, 'Dim of the output of RNN.')
+flags.DEFINE_string('reward_func', 'DefaultL1', 'Reward function of the environment.')
 flags.DEFINE_integer('num_layers', 3, 'Number of layers of the RNN.')
 flags.DEFINE_integer('buffer_size', 100_000, 'Size of the replay buffer.')
 flags.DEFINE_string('run_dir', './runs/', 'Logger directory.')
@@ -24,29 +25,40 @@ flags.DEFINE_string('ckpt_dir', './checkpoints/', 'Checkpoint directory.')
 flags.DEFINE_integer('tot_steps', 200_000, 'Total number of training steps.')
 flags.DEFINE_integer('seed', 0, 'Random seed.')
 # flags.DEFINE_bool('debug', False, 'Debug mode does not store training logs.')
-flags.DEFINE_bool('wandb', True, 'Whether use W&B for logging.')
+flags.DEFINE_string('logger', None, 'Which 3rd party logger to use.')
 
 def main(_):
     os.makedirs(FLAGS.run_dir, exist_ok=True)
     os.makedirs(FLAGS.ckpt_dir, exist_ok=True)
     
-    hyper = {
+    config_dict = {
         "obs_ord": FLAGS.obs_ord,
         "seq_len": FLAGS.seq_len,
         "features_dim": FLAGS.features_dim,
         "num_layers": FLAGS.num_layers,
         "tot_steps": FLAGS.tot_steps
     }
-
-    wandb.init(project="rlfd-grid", config=hyper)
-    logger = wandb if FLAGS.wandb else None
     
+    logger = None
+    if FLAGS.logger == 'comet':
+        from comet_ml import Experiment
+        logger = Experiment(
+            api_key='BZy4qcxu4uysjvaOdgTjCfT2n',
+            project_name='rlfd',
+            workspace='gariscat',
+        )
+        logger.log_parameters(config_dict)
+    elif FLAGS.logger == 'wandb':
+        import wandb
+        pass
+
     env = PulseEnv(
         trace_path=FLAGS.trace_path,
         source_id=FLAGS.source_id,
         obs_ord=FLAGS.obs_ord,
         epi_len=FLAGS.epi_len,
         seq_len=FLAGS.seq_len,
+        reward_func=L1PunishFP if FLAGS.reward_func == 'L1PunishFP' else DefaultL1,
         logger=logger,
     )
     env.seed(FLAGS.seed)
@@ -66,18 +78,21 @@ def main(_):
         verbose=2,
     )
     
-    config_info = f'ord_{FLAGS.obs_ord}_seqlen_{FLAGS.seq_len}_dim_{FLAGS.features_dim}_layers_{FLAGS.num_layers}'
+    config_str = f'ord_{FLAGS.obs_ord}_seqlen_{FLAGS.seq_len}_dim_{FLAGS.features_dim}_layers_{FLAGS.num_layers}'
     model.learn(
         total_timesteps=FLAGS.tot_steps,
         log_interval=1,
-        tb_log_name=config_info,
+        tb_log_name=config_str,
         progress_bar=True
     )
     ckpt_name = re.sub(r'\W+', '', str(datetime.now()))
-    model.save(os.path.join(FLAGS.ckpt_dir, config_info+'_'+ckpt_name))
+    model.save(os.path.join(FLAGS.ckpt_dir, config_str+'_'+ckpt_name))
 
     eval_results = evaluate(env, model, num_episodes=10)
     print(eval_results)
+    eval_results.update(config_dict)
+    with open(os.path.join(FLAGS.run_dir, config_str)+'_1/eval_results.json', 'w') as f:
+        json.dump(eval_results, f)
     """"""
     """
     for _ in range(10):

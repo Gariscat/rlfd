@@ -5,9 +5,13 @@ from datetime import datetime
 import re
 
 
-def default_L1(target, pred):
+def DefaultL1(target, pred):
     dis = np.abs(pred-target).item()
     return np.exp(-dis)
+
+
+def L1PunishFP(target, pred):
+    return pred-target if pred > target else -1
 
 
 def plot_trace(
@@ -39,8 +43,12 @@ def evaluate(env, model, num_episodes=100, plot=False):
     criteria = {
         'step_rewards': [],
         'episode_rewards': [],
+        'false_positives': [],
+        'detection_times': [],
         'avg_step_reward': 0,
         'avg_episode_reward': 0,
+        'avg_false_positive': None,
+        'avg_detection_time': np.inf,
     }
     for i_episode in trange(num_episodes, desc='Evaluation'):
         targ_trace, pred_trace = [], []
@@ -53,8 +61,11 @@ def evaluate(env, model, num_episodes=100, plot=False):
         while not done:
             action, _ = model.predict(obs)
             obs, reward, done, info = env.step(action)
-
+            """"""
             criteria['step_rewards'] += [reward]
+            criteria['false_positives'] += [int(info['false_positive'])]
+            criteria['detection_times'] += [info['detection_time']]
+            
             r += reward
 
             target = env.state[-1, 0]
@@ -72,5 +83,10 @@ def evaluate(env, model, num_episodes=100, plot=False):
 
     criteria['avg_step_reward'] = np.mean(criteria['step_rewards'])
     criteria['avg_episode_reward'] = np.mean(criteria['episode_rewards'])
+    criteria['avg_false_positive'] = np.mean(criteria['false_positives'])
+    criteria['avg_detection_time'] = np.mean(criteria['detection_times'])
+
+    for k in ('step_rewards', 'episode_rewards', 'false_positives', 'detection_times'):
+        criteria.pop(k)
 
     return criteria

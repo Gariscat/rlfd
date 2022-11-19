@@ -2,7 +2,7 @@ import gym
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import wandb
+from comet_ml import Experiment
 from utils import *
 
 class PulseEnv(gym.Env):
@@ -15,8 +15,8 @@ class PulseEnv(gym.Env):
         scale=1e8,
         seq_len=16,
         epi_len=1000,
-        reward_func=default_L1,
-        logger=wandb
+        reward_func=DefaultL1,
+        logger=None,
     ) -> None:
         super().__init__()
         self._trace_path = trace_path
@@ -85,13 +85,16 @@ class PulseEnv(gym.Env):
 
         info = {
             'step_reward': reward,
+            'false_positive': action < next_gap,
+            'detection_time': max(0, action-next_gap),
             'target': next_gap,
             'pred': action,
             # 'dis': dis,
             # 'rescaled_dis': dis * self._scale
         }
         if self._logger:
-            self._logger.log(info)
+            if isinstance(self._logger, Experiment):
+                self._logger.log_metrics(info, step=1)
 
         return self.state, reward, done, info
 
