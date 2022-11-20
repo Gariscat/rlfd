@@ -86,7 +86,7 @@ class PulseEnv(gym.Env):
         info = {
             'step_reward': reward,
             'false_positive': action < next_gap,
-            'detection_time': max(0, action-next_gap),
+            'detection_time': max(0, (action-next_gap).item()),
             'target': next_gap,
             'pred': action,
             # 'dis': dis,

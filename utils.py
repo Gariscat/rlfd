@@ -11,7 +11,7 @@ def DefaultL1(target, pred):
 
 
 def L1PunishFP(target, pred):
-    return pred-target if pred > target else -1
+    return (pred-target).item() if pred > target else -1
 
 
 def plot_trace(

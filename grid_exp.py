@@ -12,15 +12,15 @@ assert args.task_id > 0
     
 if __name__ == '__main__':
     print(args)
-    for reward_func in ("DefaultL1", "L1PunishFP", )
+    for reward_func in ("DefaultL1", "L1PunishFP", ):
         for features_dim in (16,):
             # for wptype in [0.25, 0.5, 0.75]:
             for num_layers in (1, 2, 3):
                 subprocess.call(f'python train.py \
-                    --obs_ord={args.task_id} \
-                    --reward_func={reward_func} \
-                    --features_dim={features_dim} \
-                    --num_layers={num_layers} \
-                    --tot_steps={args.tot_steps}', \
+                    --obs_ord {args.task_id} \
+                    --reward_func {reward_func} \
+                    --features_dim {features_dim} \
+                    --num_layers {num_layers} \
+                    --tot_steps {args.tot_steps}', \
                     shell=True
                 )
