@@ -1,26 +1,13 @@
 #!/bin/bash
-#SBATCH -J rlfd_grid_exp
-#SBATCH --verbose
-#SBATCH -p aquila
-#SBATCH --ntasks-per-node=1
-#SBATCH --time=48:00:00
-#SBATCH --gres=gpu:3080Ti:1
-#SBATCH --mem=32GB
-#SBATCH --mail-type=END
-#SBATCH --mail-user=xl3133@nyu.edu
-#SBATCH --array=1-3
-#SBATCH --output=runs/output_%a.out
-#SBATCH --error=runs/output_%a.err
 
-conda init bash
-source ~/.bashrc 
+conda activate mlfd
 
-module load anaconda3 cuda/11.3.1
-source activate mlfd
-
-which python
 nvidia-smi
 
 cd ~/rlfd/
 
-python grid_exp.py --task_id ${SLURM_ARRAY_TASK_ID}
+nohup python grid_exp.py --obs_ord 1 >> runs/obs_ord_1.out
+nohup python grid_exp.py --obs_ord 2 >> runs/obs_ord_2.out
+nohup python grid_exp.py --obs_ord 3 >> runs/obs_ord_3.out
+
+# record time 2022.12.8 9:54

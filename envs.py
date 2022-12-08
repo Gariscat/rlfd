@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from comet_ml import Experiment
+import wandb
 from utils import *
 
 class PulseEnv(gym.Env):
@@ -85,7 +86,7 @@ class PulseEnv(gym.Env):
 
         info = {
             'step_reward': reward,
-            'false_positive': action < next_gap,
+            'false_positive': int(action < next_gap),
             'detection_time': max(0, (action-next_gap).item()),
             'target': next_gap,
             'pred': action,
@@ -95,6 +96,8 @@ class PulseEnv(gym.Env):
         if self._logger:
             if isinstance(self._logger, Experiment):
                 self._logger.log_metrics(info, step=1)
+            else:  # wandb
+                self._logger.log(info)
 
         return self.state, reward, done, info
 

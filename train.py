@@ -26,7 +26,7 @@ parser.add_argument('--ckpt_dir', type=str, default='./checkpoints/', help='Chec
 parser.add_argument('--tot_steps', type=int, default=200_000, help='Total number of training steps.')
 parser.add_argument('--seed', type=int, default=0, help='Random seed.')
 # args.DEFINE_bool('debug', False, 'Debug mode does not store training logs.')
-parser.add_argument('--logger', type=str, default=None, help='Which 3rd party logger to use.')
+parser.add_argument('--logger', type=str, default='wandb', help='Which 3rd party logger to use.')
 args = parser.parse_args()
 
 
@@ -54,7 +54,8 @@ if __name__ == '__main__':
         logger.log_parameters(config_dict)
     elif args.logger == 'wandb':
         import wandb
-        pass
+        wandb.init(project='rlfd-grid', entity='kgv007', config=config_dict)
+        logger = wandb
 
     env = PulseEnv(
         trace_path=args.trace_path,
@@ -87,7 +88,6 @@ if __name__ == '__main__':
         total_timesteps=args.tot_steps,
         log_interval=1,
         tb_log_name=config_str,
-        progress_bar=True
     )
     ckpt_name = re.sub(r'\W+', '', str(datetime.now()))
     model.save(os.path.join(args.ckpt_dir, config_str+'_'+ckpt_name))
