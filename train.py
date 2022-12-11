@@ -54,7 +54,7 @@ if __name__ == '__main__':
         logger.log_parameters(config_dict)
     elif args.logger == 'wandb':
         import wandb
-        wandb.init(project='rlfd-grid', entity='kgv007', config=config_dict)
+        wandb.init(project='rlfd', entity='kgv007', config=config_dict)
         logger = wandb
 
     reward_func = DefaultL1
