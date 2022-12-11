@@ -57,13 +57,19 @@ if __name__ == '__main__':
         wandb.init(project='rlfd-grid', entity='kgv007', config=config_dict)
         logger = wandb
 
+    reward_func = DefaultL1
+    if args.reward_func == 'L1ConstPunishFP':
+        reward_func = L1ConstPunishFP
+    elif args.reward_func == 'L1TanhPunishFP':
+        reward_func = L1TanhPunishFP
+
     env = PulseEnv(
         trace_path=args.trace_path,
         source_id=args.source_id,
         obs_ord=args.obs_ord,
         epi_len=args.epi_len,
         seq_len=args.seq_len,
-        reward_func=L1PunishFP if args.reward_func == 'L1PunishFP' else DefaultL1,
+        reward_func=reward_func,
         logger=logger,
     )
     env.seed(args.seed)

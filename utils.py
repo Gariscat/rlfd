@@ -10,8 +10,11 @@ def DefaultL1(target, pred):
     return np.exp(-dis)
 
 
-def L1PunishFP(target, pred):
+def L1ConstPunishFP(target, pred):
     return (pred-target).item() if pred > target else -1
+
+def L1TanhPunishFP(target, pred):
+    return (pred-target).item() if pred > target else np.tanh(pred-target)
 
 
 def plot_trace(

@@ -12,8 +12,8 @@ assert args.obs_ord > 0
     
 if __name__ == '__main__':
     print(args)
-    for reward_func in ("DefaultL1", "L1PunishFP", ):
-        for features_dim in (16, 32,):
+    for reward_func in ("DefaultL1", "L1ConstPunishFP", "L1TanhPunishFP", ):
+        for features_dim in (32,):
             for num_layers in (1, 2,):
                 subprocess.call(f'python train.py \
                     --obs_ord {args.obs_ord} \
