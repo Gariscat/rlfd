@@ -5,15 +5,15 @@ from datetime import datetime
 import re
 
 
-def DefaultL1(target, pred):
+def DefaultL1(pred, target):
     dis = np.abs(pred-target).item()
     return np.exp(-dis)
 
 
-def L1ConstPunishFP(target, pred):
+def L1ConstPunishFP(pred, target):
     return np.exp(-(pred-target)).item() if pred > target else -1
 
-def L1TanhPunishFP(target, pred):
+def L1TanhPunishFP(pred, target):
     return np.exp(-(pred-target)).item() if pred > target else np.tanh(pred-target).item()
 
 
